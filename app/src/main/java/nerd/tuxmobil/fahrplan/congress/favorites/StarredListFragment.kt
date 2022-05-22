@@ -3,14 +3,7 @@ package nerd.tuxmobil.fahrplan.congress.favorites
 import android.content.Context
 import android.os.Bundle
 import android.util.SparseBooleanArray
-import android.view.ActionMode
-import android.view.ContextThemeWrapper
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.AbsListView
 import android.widget.AbsListView.MultiChoiceModeListener
 import android.widget.HeaderViewListAdapter
@@ -74,6 +67,8 @@ class StarredListFragment :
      */
     private lateinit var currentListView: ListView
 
+    private lateinit var spinnerView: View
+
     private val starredListAdapter: StarredListAdapter
         get() {
             val headerViewListAdapter = currentListView.adapter as HeaderViewListAdapter
@@ -82,7 +77,11 @@ class StarredListFragment :
 
     private var preserveScrollPosition = false
 
-    private val viewModel: StarredListViewModel by viewModels { StarredListViewModelFactory(appRepository) }
+    private val viewModel: StarredListViewModel by viewModels {
+        StarredListViewModelFactory(
+            appRepository
+        )
+    }
 
     @MainThread
     @CallSuper
@@ -113,6 +112,9 @@ class StarredListFragment :
         currentListView.choiceMode = AbsListView.CHOICE_MODE_MULTIPLE_MODAL
         currentListView.setMultiChoiceModeListener(this)
         currentListView.setOnScrollListener(this)
+
+        spinnerView = view.requireViewByIdCompat(R.id.loading_spinner_view)
+
         return view
     }
 
@@ -128,6 +130,8 @@ class StarredListFragment :
             val adapter = StarredListAdapter(activity, sessions, numDays, useDeviceTimeZone)
             currentListView.adapter = adapter
             activity.invalidateOptionsMenu()
+
+            spinnerView.visibility = View.GONE
         }
         viewModel.shareSimple.observe(viewLifecycleOwner) { formattedSession ->
             SessionSharer.shareSimple(requireContext(), formattedSession)
